@@ -8,10 +8,10 @@ function read_ncdf(filename::String,vars...)
         vars = [k for k in keys(ncid.vars)]
     end
 
-    variables = Dict()
+    variables = Dict{String,Any}()
 
     for v in vars
-        newVar = [v=>NetCDF.readvar(ncid,v)]
+        newVar = Dict([(v,NetCDF.readvar(ncid,v))])
         merge!(variables,newVar)
     end
 
