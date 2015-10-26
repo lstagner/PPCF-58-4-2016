@@ -1,6 +1,6 @@
 using NetCDF
 
-function read_ncdf(filename::String,vars...)
+function read_ncdf(filename::AbstractString,vars...)
 
     ncid = NetCDF.open(filename);
 
@@ -8,7 +8,7 @@ function read_ncdf(filename::String,vars...)
         vars = [k for k in keys(ncid.vars)]
     end
 
-    variables = Dict{String,Any}()
+    variables = Dict{AbstractString,Any}()
 
     for v in vars
         newVar = Dict([(v,NetCDF.readvar(ncid,v))])

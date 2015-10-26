@@ -14,7 +14,10 @@ function polyharmonicK(r,K)
   end
 end
 
-function PolyharmonicSpline(K::Int64, centers::Array{Float64,2},values::Array{Float64}; s = 0.0)
+function PolyharmonicSpline(K::Int64,
+                            centers::AbstractArray{Float64,2},
+                            values::AbstractArray{Float64};
+                            s = 0.0)
   m,n = size(centers)
   m != length(values) && throw(DimensionMismatch())
 
@@ -29,9 +32,9 @@ function PolyharmonicSpline(K::Int64, centers::Array{Float64,2},values::Array{Fl
     end
   end
   M = M .+ s.*eye(m)
-  L = [[M N],[N' zeros(n+1,n+1)]]
+  L = [[M N]; [N' zeros(n+1,n+1)]]
 
-  w = pinv(L)*[values,zeros(n+1)]
+  w = pinv(L)*[values;zeros(n+1)]
 
   ivalues = zeros(m)
   for i=1:m
@@ -50,11 +53,15 @@ function PolyharmonicSpline(K::Int64, centers::Array{Float64,2},values::Array{Fl
   return PolyharmonicSpline(n,K,w,centers,error)
 end
 
-function PolyharmonicSpline(K::Int64, centers::Vector{Float64},values::Vector{Float64};s = 0.0)
+function PolyharmonicSpline(K::Int64,
+                            centers::Vector{Float64},
+                            values::Vector{Float64};
+                            s = 0.0)
+
   PolyharmonicSpline(K,centers'',values,s=s)
 end
 
-function interpolate(S::PolyharmonicSpline,x::Array{Float64,2})
+function interpolate(S::PolyharmonicSpline,x::AbstractArray{Float64,2})
   m,n = size(x)
 
   n != S.dim && throw(DimensionMismatch("$m != $(S.dim)"))

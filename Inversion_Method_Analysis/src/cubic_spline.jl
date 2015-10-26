@@ -5,7 +5,7 @@ type CubicSpline{T} # Cubic Hermite Spline
   m::Array{T,1} # Tangent at knots
 end
 
-function CubicSpline{T<:Real}(x::Array{T,1},y::Array{T,1})
+function CubicSpline{T<:Real}(x::AbstractArray{T,1},y::AbstractArray{T,1})
   issorted(x) || throw(ArgumentError("x points must be in ascending order"))
   nx = length(x)
   m = zeros(nx)
@@ -17,7 +17,7 @@ function CubicSpline{T<:Real}(x::Array{T,1},y::Array{T,1})
   return CubicSpline(nx,x,y,m)
 end
 
-function MonotoneCubicSpline{T<:Real}(x::Array{T,1},y::Array{T,1})
+function MonotoneCubicSpline{T<:Real}(x::AbstractArray{T,1},y::AbstractArray{T,1})
   issorted(x) || throw(ArgumentError("x points must be in ascending order"))
   nx = length(x)
   m = zeros(nx)
@@ -36,7 +36,7 @@ function MonotoneCubicSpline{T<:Real}(x::Array{T,1},y::Array{T,1})
   return CubicSpline(nx,x,y,m)
 end
 
-function interpolate{T<:Real}(S::CubicSpline{T},x::Union(T,Array{T,1}))
+function interpolate{T<:Real}(S::CubicSpline{T},x::Union{T,AbstractArray{T,1}})
   xrange = extrema(S.x)
   if any((x .< xrange[1]) | (x .> xrange[2]))
     throw(ArgumentError("Outside of Range"))

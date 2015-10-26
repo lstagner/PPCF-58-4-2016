@@ -1,4 +1,4 @@
-function circumcircle_curvature{T<:Real}(x::Array{T,1},y::Array{T,1})
+function circumcircle_curvature{T<:Real}(x::AbstractArray{T,1},y::AbstractArray{T,1})
   # The curvature at a point P[i] is defined as 1/R where R is the radius of the osculating
   # circle at P[i]. The osculating circle at P[i] can be approximated by the circumcircle
   # of the points P[i-1],P[i],P[i+1]. The inverse of the radius of this circumcircle is then
@@ -31,8 +31,10 @@ function circumcircle_curvature{T<:Real}(x::Array{T,1},y::Array{T,1})
   return kappa
 end
 
-function discrete_lcurve(RF,K ; nseeds = 21
-  , kwargs = Dict{Symbol,Any}(), doplot=false, filename = Void)
+function discrete_lcurve(RF, K;
+                         nseeds = 21,
+                         kwargs = Dict{Symbol,Any}(),
+                         doplot=false, filename = Void)
 
   k_step = (K[end]-K[1])/nseeds
   k_values = unique(int(K[1]:k_step:K[end]))
@@ -61,7 +63,7 @@ function discrete_lcurve(RF,K ; nseeds = 21
 
   while true
     i1 = MonotoneCubicSpline(lrho,lxi)
-    i2 = PolyharmonicSpline(1,[lrho lxi],float(k_values))
+    i2 = PolyharmonicSpline(1,[lrho lxi],Float64(k_values))
 
     curvature = circumcircle_curvature(lrho,lxi)
     cmax_ind = indmax(curvature)
@@ -71,7 +73,7 @@ function discrete_lcurve(RF,K ; nseeds = 21
       lrho_left = lrho[cmax_ind]-0.5*abs(lrho[cmax_ind] - lrho[cmax_ind-1])
       lxi_left = interpolate(i1,lrho_left)[1]
       k = interpolate(i2,lrho_left,lxi_left)[1]
-      k1, k2 = int(floor(k)), int(ceil(k))
+      k1, k2 = floor(Int64,k), ceil(Int64,k)
       k1_in_set = issubset(k1,k_set)
       k2_in_set = issubset(k2,k_set)
 
@@ -79,7 +81,7 @@ function discrete_lcurve(RF,K ; nseeds = 21
         !k1_in_set ? k_left = k1 : k_left = k2
         push!(k_new,k_left)
       elseif !k1_in_set & !k2_in_set
-        k_left = int(round(k))
+        k_left = round(Int64,k)
         push!(k_new,k_left)
       end
 
@@ -89,7 +91,7 @@ function discrete_lcurve(RF,K ; nseeds = 21
       lrho_right = lrho[cmax_ind] + 0.5*abs(lrho[cmax_ind+1] - lrho[cmax_ind])
       lxi_right = interpolate(i1,lrho_right)[1]
       k = interpolate(i2,lrho_right,lxi_right)[1]
-      k1, k2 = int(floor(k)), int(ceil(k))
+      k1, k2 = floor(Int64,k), ceil(Int64,k)
       k1_in_set = issubset(k1,k_set)
       k2_in_set = issubset(k2,k_set)
 
@@ -97,7 +99,7 @@ function discrete_lcurve(RF,K ; nseeds = 21
         !k1_in_set ? k_right = k1 : k_right = k2
         push!(k_new,k_right)
       elseif !k1_in_set & !k2_in_set
-        k_right = int(round(k))
+        k_right = round(Int64,k)
         push!(k_new,k_right)
       end
     end
@@ -128,18 +130,19 @@ function discrete_lcurve(RF,K ; nseeds = 21
 
   if doplot
     top_k = k_values[cmax_ind]
-    fig,ax = plt.subplots(ncols=2)
+    fig,ax = plt[:subplots](ncols=2)
+    fig[:set_size_inches](12,5)
     lr = linspace(extrema(lrho)...,200)
     lx = interpolate(i1,lr)
     ax[1][:plot](exp10(lr),exp10(lx),"k")
     ax[1][:plot](exp10(lrho),exp10(lxi),"bo",markersize=3)
     ax[1][:plot](exp10(lrho[cmax_ind]),exp10(lxi[cmax_ind]),"ro",label = "K = $(top_k)")
-    ax[1][:set_aspect]("equal")
+    #ax[1][:set_aspect]("equal")
     ax[1][:set_xscale]("log")
     ax[1][:set_yscale]("log")
     ax[1][:set_xlabel](L"\chi^2(x_{\alpha})",fontsize=18,fontname="cmr10")
     ax[1][:set_ylabel](L"\mathcal{R}(x_{\alpha})",fontsize=18,fontname="cmr10")
-    ax[1][:set_title]("L Curve",fontsize=20,fontname="cmr10")
+    #ax[1][:set_title]("L Curve",fontsize=20,fontname="cmr10")
     ax[1][:legend](loc=3,numpoints=1)
     ax[2][:plot](exp10(lrho),curvature,"k")
     ax[2][:plot](exp10(lrho),curvature,"bo")
@@ -147,7 +150,7 @@ function discrete_lcurve(RF,K ; nseeds = 21
     ax[2][:set_xlabel](L"\chi^2(x_{\alpha})",fontsize=18,fontname="cmr10")
     ax[2][:set_ylabel](L"\kappa",fontsize=18,fontname="cmr10")
     ax[2][:set_xscale]("log")
-    ax[2][:set_title]("Curvature",fontsize=20,fontname="cmr10")
+    #ax[2][:set_title]("Curvature",fontsize=20,fontname="cmr10")
     ax[2][:legend](numpoints=1,loc=3)
     fig[:tight_layout]()
     if filename != Void
@@ -157,7 +160,13 @@ function discrete_lcurve(RF,K ; nseeds = 21
   return k_values[cmax_ind]
 end
 
-function lcurve(RF; log_alpha_range = (-5,20), nseeds=5, maxiter = 50, log_tol = 1.0e-5, doplot=false,filename=Void, verbose=false,debug_plots=false,kwargs = Dict{Symbol,Any}())
+function lcurve(RF;
+                log_alpha_range = (-5,20),
+                nseeds=5, maxiter = 50,
+                log_tol = 1.0e-5,
+                doplot=false, filename=Void,
+                verbose=false, debug_plots=false,
+                kwargs = Dict{Symbol,Any}())
 
   # Calculate initial points
   alpha = logspace(log_alpha_range...,nseeds)
@@ -191,7 +200,7 @@ function lcurve(RF; log_alpha_range = (-5,20), nseeds=5, maxiter = 50, log_tol =
   for i=1:maxiter
     # Interpolate points
     i1 = MonotoneCubicSpline(lrho,lxi)
-    i2 = PolyharmonicSpline(2,[lrho lxi],lal)
+    i2 = PolyharmonicSpline(2,hcat(lrho,lxi),lal)
 
     curvature = circumcircle_curvature(lrho,lxi)
 
@@ -206,7 +215,7 @@ function lcurve(RF; log_alpha_range = (-5,20), nseeds=5, maxiter = 50, log_tol =
 
     # Debugging plots
     if debug_plots
-      fig,ax = plt.subplots(ncols=2)
+      fig,ax = plt[:subplots](ncols=2)
       ax[1][:plot](lrho,lxi,"k")
       ax[1][:plot](lrho,lxi,"bo",markersize=3)
       ax[1][:plot](lrho[ind],lxi[ind],"ro")
@@ -295,7 +304,7 @@ function lcurve(RF; log_alpha_range = (-5,20), nseeds=5, maxiter = 50, log_tol =
     i1 = MonotoneCubicSpline(lrho,lxi)
     lrho_p = linspace(minimum(lrho),maximum(lrho),n)
     lxi_p = interpolate(i1,lrho_p)
-    fig,ax = plt.subplots(ncols=2)
+    fig,ax = plt[:subplots](ncols=2)
     fig[:set_size_inches](12,5)
     ax[1][:plot](exp10(lrho_p),exp10(lxi_p),"k")
     ax[1][:plot](exp10(lrho),exp10(lxi),"bo",markersize=3)
@@ -304,17 +313,17 @@ function lcurve(RF; log_alpha_range = (-5,20), nseeds=5, maxiter = 50, log_tol =
     ax[1][:set_yscale]("log")
     ax[1][:set_xlabel](L"\chi^2(x_{\alpha})",fontsize=18)
     ax[1][:set_ylabel](L"\mathcal{R}(x_{\alpha})",fontsize=18)
-    ax[1][:set_title]("L Curve",fontname="cmr10",fontsize=20)
+    #ax[1][:set_title]("L Curve",fontname="cmr10",fontsize=20)
     ax[1][:legend](loc=3,numpoints=1)
     ax[2][:plot](collect(1:count),alpha_vec,"k")
     ax[2][:set_ylabel](L"\alpha",fontsize=18)
     ax[2][:set_xlabel]("Iteration",fontname="cmr10",fontsize=18)
-    ax[2][:set_title]("Alpha Convergence",fontname="cmr10",fontsize=18)
+    #ax[2][:set_title]("Alpha Convergence",fontname="cmr10",fontsize=18)
     fig[:tight_layout]()
     if filename != Void
       fig[:savefig](filename,bbox_inches="tight",dpi=1200)
     end
-    #plt.close("all")
+    #plt[:close]("all")
   end
 
   return alpha0
