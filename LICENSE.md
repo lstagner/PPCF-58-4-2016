@@ -1,4 +1,4 @@
-opyright (c) 2015- Luke Stagner
+Copyright (c) 2015- Luke Stagner
 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
