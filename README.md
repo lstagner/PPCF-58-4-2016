@@ -1,5 +1,6 @@
-#Inversion methods for fast-ion velocity-space tomography in fusion plasmas 
+[![DOI](https://zenodo.org/badge/21550/lstagner/PPCF-58-4-2016.svg)](https://zenodo.org/badge/latestdoi/21550/lstagner/PPCF-58-4-2016)
 
+#Inversion methods for fast-ion velocity-space tomography in fusion plasmas 
 This is a collection of the data and associated analysis for ["Inversion methods for fast-ion velocity-space tomography in fusion plasmas" published in Plasma Physics and Controlled Fusion **58**(4) 2016](http://iopscience.iop.org/article/10.1088/0741-3335/58/4/045016/meta)
 
 ##Abstract
@@ -9,6 +10,16 @@ Velocity-space tomography has been used to infer 2D fast-ion velocity distributi
 If you find this work useful, please cite both the paper and the source code
 
 ##Code Citation
+```
+@misc{stagner2016inversion_code,
+  author       = {Stagner, Luke and Jacobsen, Asger Schou},
+  title        = {{Source Code for "Inversion methods for fast-ion velocity-space tomography in fusion plasmas"}},
+  month        = apr,
+  year         = 2016,
+  doi          = {10.5281/zenodo.50087},
+  url          = {http://dx.doi.org/10.5281/zenodo.50087}
+}
+```
 
 ##Paper Citation
 ```
